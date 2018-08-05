@@ -9,7 +9,7 @@ class SingleArrayWindow:
         plt = pg.plot()
         plt.setWindowTitle('mfcc')
         #plt.autoPixelRange = True
-        plt.setRange(QtCore.QRectF(0, 0, 20, 20)) 
+        plt.setRange(QtCore.QRectF(0, -50, 20, 100)) 
         plt.setLabel('bottom', 'Channel', units='')
         c = plt.plot(pen='#00FF00')
         self.curve = c

@@ -3,9 +3,9 @@ import wave
 import numpy as np
 import struct
 from singlearraywindow import SingleArrayWindow
-from peak_detection import get_filterbanks, powspec
+from peak_detection import MFCCFeature
 
-nwindow = 2048  
+nwindow = 512  
 stride = 128
 nfeat = 20
 
@@ -20,8 +20,9 @@ data = f.readframes(stride)
 frame = np.zeros(nwindow,dtype=float) 
 count = 100000
 # prepare mfcc filterbanks
-fbs = get_filterbanks(nfeat,nwindow,f.getframerate(),0,False)
-fcwindow = SingleArrayWindow(nfeat)
+mfcc = MFCCFeature(nfeat,nwindow,f.getframerate())
+# fbs = get_filterbanks(nfeat,nwindow,f.getframerate(),0,False)
+fcwindow = SingleArrayWindow(13)
 
 while data:  
     frame[:-stride] = frame[stride:]
@@ -30,10 +31,8 @@ while data:
     data_float = [float(val) / pow(2, 15) for val in data_float]
     frame[-stride:] = data_float[:]
     frames = [frame]
-    # get power spec
-    pspec = powspec(frames, nwindow)
-    # get mfcc feature
-    feat = np.dot(pspec,fbs.T)
+    # compute mfcc features
+    feat,_ = mfcc.mfcc(frames)
     # sync ui
     fcwindow.set_data(feat)
     stream.write(data)  
