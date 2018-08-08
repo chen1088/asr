@@ -5,8 +5,8 @@ import struct
 from singlearraywindow import SingleArrayWindow
 from peak_detection import MFCCFeature
 
-nwindow = 512  
-stride = 128
+nwindow = 2**15  
+stride = 2**12
 nfeat = 20
 
 f = wave.open(r"i7-965-clipped.wav","rb")   
@@ -22,7 +22,7 @@ count = 100000
 # prepare mfcc filterbanks
 mfcc = MFCCFeature(nfeat,nwindow,f.getframerate())
 # fbs = get_filterbanks(nfeat,nwindow,f.getframerate(),0,False)
-fcwindow = SingleArrayWindow(13)
+fcwindow = SingleArrayWindow()
 
 while data:  
     frame[:-stride] = frame[stride:]
@@ -32,9 +32,17 @@ while data:
     frame[-stride:] = data_float[:]
     frames = [frame]
     # compute mfcc features
-    feat,_ = mfcc.mfcc(frames)
+    feat,energy = mfcc.mfcc(frames)
     # sync ui
-    fcwindow.set_data(feat)
+    # fcwindow.set_data(feat)
+    fftspec = np.fft.fft(frames)
+    fftspec = np.absolute(fftspec)
+    #fftspec = fftspec[:256]
+    value = fftspec.argmax()
+    #fftspec[value] = 0.
+    #value = fftspec.argmax()
+    if energy>0.5 and value < 500. and value > 10.:
+        fcwindow.push_point(value)
     stream.write(data)  
     data = f.readframes(stride)
     count = count - 1

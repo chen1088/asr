@@ -10,6 +10,7 @@ class MFCCFeature():
         self.nfft = fftsize
         self.numcep = numcep
         self.ceplifter = ceplifter
+        self.minseq = 0.001
 
     def mfcc(self, signal):
         pspec = MFCCFeature.powspec(signal,self.nfft)
@@ -20,11 +21,13 @@ class MFCCFeature():
         # eliminate 0 entries
         temp = np.where(temp == 0,np.finfo(float).eps, temp)
         # take the log
-        temp = np.log(temp)
+        # temp = np.log(temp)
+        # eliminate small entries
+        temp = np.where(temp < -5.,-40., temp)
         # dct
-        temp = dct(temp, type=2, axis=1, norm='ortho')[:,:self.numcep]
+        #temp = dct(temp, type=2, axis=1, norm='ortho')[:,:self.numcep]
         # lift
-        temp = MFCCFeature.lifter(temp,self.ceplifter)
+        #temp = MFCCFeature.lifter(temp,self.ceplifter)
         return temp , energy
 
     @staticmethod
